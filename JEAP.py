@@ -1,12 +1,81 @@
 #!/usr/bin/env python3
 class JEAP():
-    @classmethod
-    def get_char(cls):
+    def __init__(self, key=1, start=1, key_func=lambda key, i: key + i, verbose=False):
+        self.key = key
+        self.start = start
+        self.key_func = key_func
+        self.verbose = verbose
+
+    @property
+    def key_func(self):
+        return self._key_func
+
+    @key_func.setter
+    def key_func(self, func):
+        if not callable(func):
+            raise ValueError("not a function: {}".format(func))
+        self._key_func = func
+
+    def get_next(self, key, index):
+        '''
+        Wrap the func call to do some error handling
+        '''
+        try:
+            n = self.key_func(key, index)
+        except Exception as e:
+            raise LookupError("An error occurred in {}: {}".format(func, e))
+        if n <= index:
+            raise ValueError("wrong value returned from {}: {} <= {}".format(func, n, index))
+        return n
+
+    def get_char(self):
         # todo: return a random char here
         return 'a'
 
-    @classmethod
-    def encrypt(cls, text, key, start=1, key_func=lambda key, i: key + i, verbose=False):
+    def print(self, *args, verbose=None):
+        '''
+        Verbose print, allows for easy debug mode or clean mode
+        :param args: Things to print 
+        :return: 
+        '''
+        if verbose or self.verbose:
+            print(*args)
+
+    def encrypt(self, text, key=None, start=None, key_func=None, verbose=False):
+        '''
+        Encrypt a string
+        :param str text: Text to encrypt
+        :param int key:  Key to decode
+        :param function key_func: Optional function to return next key location. 
+                                  Takes a two parameters, the key and the current index of the encrypted string
+        :return: Encrypted String
+        '''
+        key = key or self.key
+        start = start or self.start
+        if key_func is not None:
+            self.key_func = key_func
+        # Fill return string with padding before the first char
+        ret_str = "".join(self.get_char() for x in range(0, start - 1))
+
+        for c in text:
+            # Add the current letter to the string
+            ret_str += c
+            # Get length of string (current 1-based index)
+            i = len(ret_str)
+            # get the next key
+            next = self.get_next(key, i)
+            # Verbose print adding the character
+            self.print(len(ret_str), c, next, ': ', c)
+
+            while len(ret_str) != next:
+                # Fill the return string until the location of the next char appears
+                ret_str += self.get_char()
+                # Print the char that was just added
+                self.print(len(ret_str), c, next, ': ', ret_str[-1])
+
+        return ret_str
+
+    def decrypt(self, text, key=None, start=None, key_func=None, verbose=False):
         '''
         Encrypt a string
         :param str text: Text to encrypt
@@ -15,47 +84,36 @@ class JEAP():
                               Takes a two parameters, the key and the current index of the encrypted string
         :return: 
         '''
+        key = key or self.key
+        start = start or self.start
+        if key_func is not None:
+            self.key_func = key_func
 
-        if not callable(key_func):
-            raise ValueError("not a function: {}".format(key_func))
-
-        # Fill return string with padding before the first char
-        ret_str = "".join(JEAP.get_char() for x in range(0, start - 1))
-
-        # Verbose print, allows for easy debug mode or clean mode
-        def v_print(*args):
-            if verbose:
-                print(len(ret_str), c, next, ': ', *args)
+        i = start
+        next = self.get_next(key, i)
+        ret_str = text[i:i+1]  # get first letter
 
         for c in text:
-            # Add the current letter to the string
-            ret_str += c
-            # Get length of string (current 1-based index)
-            i = len(ret_str)
-            # get the next key
-            next = key_func(key, i)
-            if next <= i:
-                raise ValueError("wrong value returned from {}: {} <= {}".format(key_func, next, i))
+            i += 1
+            if i == next:
+                # Add the current letter to the string
+                ret_str += c
+                # Get the next key position
+                next = self.get_next(key, i)
             # Verbose print adding the character
-            v_print(c)
-
-            while len(ret_str) != next:
-                # Fill the return string until the location of the next char appears
-                ret_str += JEAP.get_char()
-                # Print the char that was just added
-                v_print(ret_str[-1])
+            self.print(i, c, next, ': ', c, 'added={}'.format(i == next), verbose=verbose)
 
         return ret_str
-
-    @classmethod
-    def decrypt(cls, text, key, func=lambda x: x):
-        pass
 
 def test(x,y):
     return x-y
 
 if __name__ == '__main__':
+    jeap = JEAP(key=1)
     TEXT = "Jodah Encryption Algorithm in Python"
     print("Encrypting '{}'".format(TEXT))
-    ret = JEAP.encrypt(TEXT, 1, verbose=False)
+    ret = jeap.encrypt(TEXT, verbose=False)
+    print(ret)
+    print("Decrypting '{}'".format(ret))
+    ret = jeap.decrypt(ret, verbose=True)
     print(ret)
