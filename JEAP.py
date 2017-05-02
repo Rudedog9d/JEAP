@@ -2,11 +2,12 @@
 import random
 
 class JEAP():
-    def __init__(self, key=1, start=1, key_func=lambda key, i: key + i, verbose=False):
+    def __init__(self, key=1, start=1, end=None, key_func=lambda key, i: key + i, verbose=False):
         self.key = key
         self.start = start
         self.key_func = key_func
         self.verbose = verbose
+        self.end = end
 
     @property
     def key_func(self):
@@ -75,6 +76,9 @@ class JEAP():
                 ret_str += self.get_char()
                 # Print the char that was just added
                 self.print(len(ret_str), c, next, ': ', ret_str[-1])
+        if self.end:
+            for i in range(0, self.end):
+                ret_str += self.get_char()
 
         return ret_str
 
@@ -92,6 +96,7 @@ class JEAP():
         start = start or self.start
         if key_func is not None:
             self.key_func = key_func
+        end = len(text) - self.end if self.end else len(text)
 
         # init some more variables
         i = 1
@@ -106,6 +111,8 @@ class JEAP():
                 ret_str += c
                 # Get the next key position - add one to index to account for current character
                 next = self.get_next(key, i + 1)
+            elif i >= end:
+                break
             # increment location in the string
             i += 1
         return ret_str
@@ -114,7 +121,7 @@ def test(x,y):
     return x-y
 
 if __name__ == '__main__':
-    jeap = JEAP(key=5, start=10, verbose=False)
+    jeap = JEAP(key=5, start=20, verbose=False)
     TEXT = "Jodah Encryption Algorithm in Python"
     print("Encrypting:\n\n{}\n\n".format(TEXT))
     ret = jeap.encrypt(TEXT, verbose=False)
