@@ -84,12 +84,9 @@ class JEAP():
 
     def decrypt(self, text, key=None, start=None, key_func=None, verbose=False):
         '''
-        Encrypt a string
-        :param str text: Text to encrypt
-        :param int key:  Key to decode
-        :param function key_func: Optional function to return next key location. 
-                              Takes a two parameters, the key and the current index of the encrypted string
-        :return: 
+        Decrypt a string
+        :param str text: Text to decrypt
+        :return: Decrypted String
         '''
         # init some variables
         key = key or self.key
