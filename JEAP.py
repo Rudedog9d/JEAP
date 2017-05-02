@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import random
+
 class JEAP():
     def __init__(self, key=1, start=1, key_func=lambda key, i: key + i, verbose=False):
         self.key = key
@@ -30,8 +32,8 @@ class JEAP():
         return n
 
     def get_char(self):
-        # todo: return a random char here
-        return 'a'
+        # return a random char in the printable range
+        return chr(random.randint(32, 126))
 
     def print(self, *args, verbose=None):
         '''
@@ -112,12 +114,11 @@ def test(x,y):
     return x-y
 
 if __name__ == '__main__':
-    jeap = JEAP(key=0)
+    jeap = JEAP(key=5, start=10, verbose=False)
     TEXT = "Jodah Encryption Algorithm in Python"
-    print("Encrypting '{}'".format(TEXT))
+    print("Encrypting:\n\n{}\n\n".format(TEXT))
     ret = jeap.encrypt(TEXT, verbose=False)
-    print(ret)
-    print()
-    print("Decrypting '{}'".format(ret))
+    print(ret, '\n\n')
+    print("Decrypting:\n\n{}\n\n".format(ret))
     ret = jeap.decrypt(ret, verbose=False)
     print(ret)
