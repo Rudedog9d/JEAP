@@ -20,12 +20,13 @@ class JEAP():
         '''
         Wrap the func call to do some error handling
         '''
+        n = None
         try:
             n = self.key_func(key, index)
         except Exception as e:
-            raise LookupError("An error occurred in {}: {}".format(func, e))
-        if n <= index:
-            raise ValueError("wrong value returned from {}: {} <= {}".format(func, n, index))
+            raise LookupError("An error occurred in {}: {}".format(self.key_func, e))
+        if n < index:
+            raise ValueError("wrong value returned from {}: {} < {}".format(self.key_func, n, index))
         return n
 
     def get_char(self):
@@ -84,36 +85,39 @@ class JEAP():
                               Takes a two parameters, the key and the current index of the encrypted string
         :return: 
         '''
+        # init some variables
         key = key or self.key
         start = start or self.start
         if key_func is not None:
             self.key_func = key_func
 
-        i = start
-        next = self.get_next(key, i)
-        ret_str = text[i:i+1]  # get first letter
+        # init some more variables
+        i = 1
+        next = start
+        ret_str = ""
+        # ret_str = text[i-1:i]  # get first letter
 
         for c in text:
-            i += 1
+            self.print(i, c, next, ': ', c, 'added={}  "{}"'.format(i == next, ret_str), verbose=verbose)
             if i == next:
                 # Add the current letter to the string
                 ret_str += c
-                # Get the next key position
-                next = self.get_next(key, i)
-            # Verbose print adding the character
-            self.print(i, c, next, ': ', c, 'added={}'.format(i == next), verbose=verbose)
-
+                # Get the next key position - add one to index to account for current character
+                next = self.get_next(key, i + 1)
+            # increment location in the string
+            i += 1
         return ret_str
 
 def test(x,y):
     return x-y
 
 if __name__ == '__main__':
-    jeap = JEAP(key=1)
+    jeap = JEAP(key=0)
     TEXT = "Jodah Encryption Algorithm in Python"
     print("Encrypting '{}'".format(TEXT))
     ret = jeap.encrypt(TEXT, verbose=False)
     print(ret)
+    print()
     print("Decrypting '{}'".format(ret))
-    ret = jeap.decrypt(ret, verbose=True)
+    ret = jeap.decrypt(ret, verbose=False)
     print(ret)
