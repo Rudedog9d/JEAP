@@ -6,15 +6,19 @@ class JEAP():
         return 'a'
 
     @classmethod
-    def encrypt(cls, text, key, start=1, func=lambda key, i: key + i, verbose=False):
+    def encrypt(cls, text, key, start=1, key_func=lambda key, i: key + i, verbose=False):
         '''
         Encrypt a string
         :param str text: Text to encrypt
         :param int key:  Key to decode
-        :param function func: Optional function to return next key location. 
+        :param function key_func: Optional function to return next key location. 
                               Takes a two parameters, the key and the current index of the encrypted string
         :return: 
         '''
+
+        if not callable(key_func):
+            raise ValueError("not a function: {}".format(key_func))
+
         # Fill return string with padding before the first char
         ret_str = "".join(JEAP.get_char() for x in range(0, start - 1))
 
@@ -26,8 +30,12 @@ class JEAP():
         for c in text:
             # Add the current letter to the string
             ret_str += c
+            # Get length of string (current 1-based index)
+            i = len(ret_str)
             # get the next key
-            next = func(key, len(ret_str))  # todo: do some error handling here on func() and ret val
+            next = key_func(key, i)
+            if next <= i:
+                raise ValueError("wrong value returned from {}: {} <= {}".format(key_func, next, i))
             # Verbose print adding the character
             v_print(c)
 
@@ -43,6 +51,8 @@ class JEAP():
     def decrypt(cls, text, key, func=lambda x: x):
         pass
 
+def test(x,y):
+    return x-y
 
 if __name__ == '__main__':
     TEXT = "Jodah Encryption Algorithm in Python"
