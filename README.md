@@ -51,7 +51,7 @@ $ ./JEAP.py -k 3 -e Jodah Encryption Algorithm in Python
  
 J&}wo,F#dI_Va6<2h4}(-v0+EiC#n41Bc=HwrW;%y,_#p+oztfwGihqXo0N3n)Ay-u1DAxAVl3b6gBWwo?yWr3x7ikKftm}Jh-$Fm.4o-:V$iDiSn@)5-^&vPe49yT_>tC7Ph(_CoG(YnAW1
  
-./JEAP.py -k 3 --decrypt 'J&}wo,F#dI_Va6<2h4}...(YnAW1'
+./JEAP.py -k 3 --decrypt 'J&}wo,F#dI_Va6<2h4}(-v0+EiC#n41Bc=HwrW;%y,_#p+oztfwGihqXo0N3n)Ay-u1DAxAVl3b6gBWwo?yWr3x7ikKftm}Jh-$Fm.4o-:V$iDiSn@)5-^&vPe49yT_>tC7Ph(_CoG(YnAW1'
  
 Jodah-Encryption-Algorithm-in-Python
 ```
