@@ -137,7 +137,7 @@ def safe_open(filename, mode=None):
 if __name__ == '__main__':
     # Set up argument parser
     from argparse import ArgumentParser
-    parser = ArgumentParser(description='Process CLI Args')
+    parser = ArgumentParser(description='Encrypt and Decrypt Strings using the JODAH Encryption Algorithm')
     parser.add_argument('text', nargs='+', help='text to encrypt/decrypt')
     parser.add_argument('-k', '--key', type=int, default=1, help='encryption/decryption key')
     parser.add_argument('-s', '--start', type=int, help='padding at start of encrypted text')
@@ -165,17 +165,17 @@ if __name__ == '__main__':
         TEXT = args.text[0].replace(' ', '-')
 
     if args.encrypt:
-        print("Encrypting:\n{}\n".format(TEXT))
-        ret = jeap.encrypt(TEXT, verbose=False)
+        jeap.print("Encrypting:\n{}\n".format(TEXT))
+        ret = jeap.encrypt(TEXT)
         if args.file:
             outfile = safe_open(args.file, 'w') or sys.stdout
         print(ret, file=outfile)
     elif args.decrypt:
-        print("Decrypting:\n{}\n".format(args.text))
-        ret = jeap.decrypt(args.text, verbose=False)
-        if args.file:
-            outfile = safe_open(args.file, 'r') or sys.stdout
-        print(ret, file=outfile)
+        jeap.print("Decrypting:\n{}\n".format(TEXT))
+        ret = jeap.decrypt(TEXT)
+        # if args.file:
+        #     outfile = safe_open(args.file, 'r') or sys.stdout
+        print(ret)
     else:
         parser.print_help()
         exit(1)
