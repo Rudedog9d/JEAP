@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import random
+import sys
+
 
 class JEAP():
-    def __init__(self, key=1, start=1, end=None, key_func=lambda key, i: key + i, verbose=False):
-        self.key = key
-        self.start = start
+    def __init__(self, key=None, start=None, end=None, key_func=lambda key, i: key + i, verbose=False):
+        self.key = key if key is not None else 1
+        self.start = start if start is not None else 1
         self.key_func = key_func
         self.verbose = verbose
-        self.end = end
+        self.end = end if start is not None else 0
 
     @property
     def key_func(self):
@@ -33,8 +35,8 @@ class JEAP():
         return n
 
     def get_char(self):
-        # return a random char in the printable range
-        return chr(random.randint(32, 126))
+        # return a random char in the printable range (excluding space)
+        return chr(random.randint(33, 126))
 
     def print(self, *args, verbose=None):
         '''
@@ -62,6 +64,7 @@ class JEAP():
         ret_str = "".join(self.get_char() for x in range(0, start - 1))
 
         for c in text:
+            # todo: Progress bar!
             # Add the current letter to the string
             ret_str += c
             # Get length of string (current 1-based index)
@@ -117,12 +120,59 @@ class JEAP():
 def test(x,y):
     return x-y
 
+def safe_open(filename, mode=None):
+    # todo: move file output inside of JEAP
+    try:
+        fp = open(filename, mode=mode or 'rw')
+    except Exception as e:
+        print("couldn't open file: {}".format(e), file=sys.stderr)
+        fp = None
+    return fp
+
+
 if __name__ == '__main__':
-    jeap = JEAP(key=5, start=20, verbose=False)
-    TEXT = "Jodah Encryption Algorithm in Python"
-    print("Encrypting:\n\n{}\n\n".format(TEXT))
-    ret = jeap.encrypt(TEXT, verbose=False)
-    print(ret, '\n\n')
-    print("Decrypting:\n\n{}\n\n".format(ret))
-    ret = jeap.decrypt(ret, verbose=False)
-    print(ret)
+    # Set up argument parser
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description='Process CLI Args')
+    parser.add_argument('text', nargs='+', help='text to encrypt/decrypt')
+    parser.add_argument('-k', '--key', type=int, default=1, help='encryption/decryption key')
+    parser.add_argument('-s', '--start', type=int, help='padding at start of encrypted text')
+    parser.add_argument('-E', '--end', type=int, help='padding at end of encrypted text')
+    parser.add_argument('-F', '--file', type=str, help='file to read/write data to')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
+    parser.add_argument('-e', '--encrypt', action='store_true', help='Encrypt the text')
+    parser.add_argument('-d', '--decrypt', action='store_true', help='Decrypt the text')
+
+    # Parse args
+    args = parser.parse_args()
+
+    # Initialize a JEAP instance
+    jeap = JEAP(key=args.key, start=args.start, end=args.end, verbose=args.verbose)
+
+    # Use stdout if no file specified
+    outfile = sys.stdout
+
+    # Get text from CLI - if no quotes used, value will be a list of strings
+    if isinstance(args.text, list) and len(args.text) > 1:
+        # No quotes used - Join list of strings into single string
+        TEXT = '-'.join(args.text)
+    else:
+        # Quotes used - good job. Just take the first thing in the list
+        TEXT = args.text[0].replace(' ', '-')
+
+    if args.encrypt:
+        print("Encrypting:\n{}\n".format(TEXT))
+        ret = jeap.encrypt(TEXT, verbose=False)
+        if args.file:
+            outfile = safe_open(args.file, 'w') or sys.stdout
+        print(ret, file=outfile)
+    elif args.decrypt:
+        print("Decrypting:\n{}\n".format(args.text))
+        ret = jeap.decrypt(args.text, verbose=False)
+        if args.file:
+            outfile = safe_open(args.file, 'r') or sys.stdout
+        print(ret, file=outfile)
+    else:
+        parser.print_help()
+        exit(1)
+
