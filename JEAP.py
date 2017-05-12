@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 import sys
+from colors import *
 
 
 class JEAP():
@@ -120,12 +121,15 @@ class JEAP():
 def test(x,y):
     return x-y
 
+def printe(*args):
+    print(red(*args), file=sys.stderr)
+
 def safe_open(filename, mode=None):
     # todo: move file output inside of JEAP
     try:
         fp = open(filename, mode=mode or 'rw')
     except Exception as e:
-        print("couldn't open file: {}".format(e), file=sys.stderr)
+        printe("couldn't open file: {}".format(e))
         fp = None
     return fp
 
